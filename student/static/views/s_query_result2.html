@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成绩单</title>
+    <link rel="stylesheet" href="http://localhost:3000/css/bootstrap.css">
+    <script src="http://localhost:3000/js/echarts.min.js"></script>
+    <style>
+      .regist{
+        border: 1px solid #eee;
+        padding: 0 20px 20px 20px;
+  
+        margin-top:30px;
+        border-radius: 4px;
+        box-shadow: 0px 0px 3px rgba(0,0,0,0.1);
+      }
+      .regist h2{
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+      .strongBox {
+        margin: 10px 0;
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+      #main{
+          width: 100%;
+          margin: 150 auto;
+          height: 500px;
+      }
+
+      * {
+        font-family: 'Righteous',cursive;
+      }
+
+
+    </style>
+</head>
+<body>
+    <div id="main"></div>
+    <div >
+        <div class="col-sm-12">
+          <table id="example1" class="table table-bordered table-striped table-hover dataTable" role="grid"
+            aria-describedby="example1_info">
+            <thead>
+              <tr>
+                <th aria-label="课程名称" style="width: 175.4px;">总成绩</th>
+                <th aria-label="成绩" style="width: 128.68px;">年段排名</th>
+              </tr>
+            </thead>
+            <tbody id="showrank">
+              
+            </tbody>
+          </table>
+        </div>
+    </div>
+    <script src="http://localhost:3000/js/jquery.min.js"></script>
+</body>
+</html>
+<script>
+    function load(){
+    $.get("/q_rank",function(data){
+      if(data.status == "success"){
+        $("#showrank").empty();
+        for(var i = 0 ; i < data.data.length; i ++){
+          new DataItem1(data.data[i]);
+        }
+      }
+    })
+  }
+  
+  function DataItem1(item) {
+    this.$dom = $("<tr><td>"+item.total+"</td><td>"+item.rnk+"</td></tr>");
+    $("#showrank").append(this.$dom);
+  }
+
+load();
+
+    var arr1 =  []
+    var arr_myscore1 = [];
+    var arr_myscore2 = [];
+    function loadData(){
+        
+        $.ajax({
+            type:"GET",
+            url :"/q_score_date",
+            async:false,
+            success:function(data){
+                if(data.status == "success"){
+           var arr_myscore=Array.from(data.data) ;
+           for(var i = 0 ; i < arr_myscore.length ; i++){
+               arr_myscore1.push(arr_myscore[i].score) ;
+               arr_myscore2.push(Number(arr_myscore[i].score)-10);
+               arr1.push({ text: ''+arr_myscore[i].courseName+'', max: 100 })
+           }
+         }
+        }
+     })
+    }
+    loadData();
+    
+      
+    
+    
+        
+    
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom, 'dark');
+    var option;
+    
+    option = {
+        color: [ '#67F9D8', '#FFE434', '#56A3F1', '#FF917C'],
+        title: {
+            text: '成绩分析表'
+        },
+        legend: {
+            data: ['Data A', 'Data B', '我的成绩','平均成绩',]
+        },
+        radar: [
+            {
+                indicator: [
+                    { text: '指标一' },
+                    { text: '指标二' },
+                    { text: '指标三' },
+                    { text: '指标四' },
+                    { text: '指标五' }
+                ],
+                center: ['25%', '50%'],
+                radius: 120,
+                startAngle: 90,
+                splitNumber: 4,
+                shape: 'circle',
+                name: {
+                    formatter: '【{value}】',
+                    textStyle: {
+                        color: '#428BD4'
+                    }
+                },
+                splitArea: {
+                    areaStyle: {
+                        color: ['#77EADF', '#26C3BE', '#64AFE9', '#428BD4'],
+                        shadowColor: 'rgba(0, 0, 0, 0.2)',
+                        shadowBlur: 10
+                    }
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(211, 253, 250, 0.8)'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(211, 253, 250, 0.8)'
+                    }
+                }
+            },
+            {
+                indicator:arr1,
+                center: ['75%', '50%'],
+                radius: 120,
+                name: {
+                    textStyle: {
+                        color: '#fff',
+                        backgroundColor: '#666',
+                        borderRadius: 3,
+                        padding: [3, 5]
+                    }
+                }
+    
+            }
+        ],
+        series: [
+            {
+                name: '雷达图',
+                type: 'radar',
+                emphasis: {
+                    lineStyle: {
+                        width: 4
+                    }
+                },
+                data: [
+                    {
+                        value: [100, 8, 0.40, -80, 2000],
+                        name: 'Data A'
+                    },
+                    {
+                        value: [60, 5, 0.30, -100, 1500],
+                        name: 'Data B',
+                        areaStyle: {
+                            color: 'rgba(255, 228, 52, 0.6)'
+                        }
+                    }
+                ]
+            },
+            {
+                name: '成绩单',
+                type: 'radar',
+                radarIndex: 1,
+                data: [
+                    {
+                        value: arr_myscore1,
+                        name: '我的成绩',
+                        symbol: 'rect',
+                        symbolSize: 12,
+                        lineStyle: {
+                            type: 'dashed'
+                        },
+                        label: {
+                            show: true,
+                            formatter: function (params) {
+                                return params.value;
+                            }
+                        }
+                    },
+                    {
+                        value: arr_myscore2,
+                        name: '平均成绩',
+                        areaStyle: {
+                            color: new echarts.graphic.RadialGradient(0.1, 0.6, 1, [
+                                {
+                                    color: 'rgba(255, 145, 124, 0.1)',
+                                    offset: 0
+                                },
+                                {
+                                    color: 'rgba(255, 145, 124, 0.9)',
+                                    offset: 1
+                                }
+                            ])
+                        }
+                    }
+                ]
+            }
+        ]
+    };
+    
+    option && myChart.setOption(option);
+    </script>
