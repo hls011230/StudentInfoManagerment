@@ -1,5 +1,8 @@
 # 编辑时间 : 2024/3/18 11:25
+import json
+
 from web3 import Web3
+from db.db import cursor,connection
 from eth_account.account import Account, LocalAccount, SignedTransaction
 
 
@@ -299,34 +302,36 @@ contract_abi = [
 # 创建合约实例
 contract_instance = w3.eth.contract(address=contract_address, abi=contract_abi)
 
+keys = {}
+
 
 # 获取Admin地址
 def get_admin():
 	return call_contract_view_func("admin")
 
 # 获取学生信息
-def get_student_info(id:str):
-	return call_contract_view_func("getStudentInfo",id)
+def get_student_info(id,token):
+	return call_contract_view_func(account=keys[token],func_name="getStudentInfo",_studentId=int(id))
 
 # 设置Handler
-def set_handler(address: str):
-	return call_contract_sign_func(func_name="setHandler",_handler=address)
+def set_handler(address: str,token: str):
+	return call_contract_sign_func(account=keys[token],func_name="setHandler",_handler=address)
 
 # 添加学生
-def add_student(id:str,name:str):
-	return call_contract_sign_func(func_name="addStudent",id=id,name=name)
+def add_student(id:str,name:str,token):
+	return call_contract_sign_func(account=keys[token],func_name="addStudent",_id=id,_name=name)
 
 # 删除学生
-def delete_student(id):
-	return call_contract_sign_func(func_name="deleteStudent",_id=id)
+def delete_student(id,token):
+	return call_contract_sign_func(account=keys[token],func_name="deleteStudent",_id=id)
 
 # 修改学生成绩
-def update_student_score(id,num,score):
-	return call_contract_sign_func(func_name="updateScore",_id=id,_num=num,_score=score)
+def update_student_score(id,num,score,token):
+	return call_contract_sign_func(account=keys[token],func_name="updateScore",_id=id,_num=num,_score=score)
 
 # 添加学生成绩
-def add_student_score(id,subject,score):
-	return call_contract_sign_func(func_name="addScore",_id=id,_subject=subject,_score=score)
+def add_student_score(id,subject,score,token):
+	return call_contract_sign_func(account=keys[token],func_name="addScore",_id=id,_subject=subject,_score=score)
 
 # 调用合约非view方法
 def call_contract_sign_func(account: LocalAccount,func_name: str,
@@ -357,7 +362,7 @@ def call_contract_sign_func(account: LocalAccount,func_name: str,
     return w3.eth.send_raw_transaction(sign_tx.rawTransaction)
 
 # 调用合约view方法
-def call_contract_view_func(func_name, **kwargs):
+def call_contract_view_func(account: LocalAccount,func_name, **kwargs):
     """
     调用合约View方法
     :param w3:Web3实例
@@ -368,4 +373,27 @@ def call_contract_view_func(func_name, **kwargs):
     :return:函数执行结果
     """
     func = getattr(contract_instance.functions, func_name)(**kwargs)
-    return func.call()
+    return func.call({"from":account.address})
+
+# 创建账户
+def create_account(name,password):
+	account = w3.eth.account.create()
+	print(password)
+	keystore = account.encrypt(password)
+	query = "INSERT INTO user (name, address,keystore) VALUES (%s, %s, %s)"
+	json_data = json.dumps(keystore)
+	values = (name, account.address, json_data)
+	cursor.execute(query, values)
+	connection.commit()
+	return account.address
+
+# 登录
+def login_account(name,password):
+	query = "SELECT keystore,id FROM user where name = %s"
+	cursor.execute(query, (name,))
+	result = cursor.fetchone()
+	print(result)
+	account: LocalAccount = Account.from_key(w3.eth.account.decrypt(json.loads(result[0]),password))
+	keys[str(result[1])] =account
+	balance_wei = w3.eth.get_balance(account.address)
+	print(balance_wei)

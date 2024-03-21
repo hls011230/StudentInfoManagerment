@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生登录</title>
-    <link rel="stylesheet" href="http://localhost:3000/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
     <style>
         .regist{
           border: 1px solid #eee;
@@ -24,9 +24,6 @@
           padding: 5px 8px;
           font-size: 12px;
         }
-        /* body{
-            background-image: url('img/2.png');
-        } */
         .wid{
           width: 240px;
         }
@@ -34,7 +31,7 @@
           margin-left: 242px;
         }
         body{
-          background-image: url("/img/1.jpg");
+          background-image: url("../static/img/1.jpg");
         }
       </style>
 </head>
@@ -51,19 +48,15 @@
             <div class="form-floating">
               <label for="floatingPassword"  style="color: #e0ddddc4;">Password</label>
               <input type="password" class="form-control wid text-center" id="password" placeholder="Password">
-              
             </div>
           </form>
         </main>
         <br>
         <button id="btn" class="w-100 btn btn-lg btn-primary" style="background-color: grey; border: 1px solid grey;" type="submit">Sign in</button>
         <a href="/regist" class="w-100 btn btn-lg btn-primary" style="background-color: grey;   border: 1px solid grey;">Sign up</a>
-        <div>
-          <a href="/student_forget_password/1"  style="color:rgba(255, 255, 240, 0.637); margin-right: -555px;">忘记密码</a>
-        </div>
       </div>
-      <script src="http://localhost:3000/js/jquery.min.js"></script>
-      <script src="http://localhost:3000/js/login.js"></script>
+      <script src="../static/js/jquery.min.js"></script>
+      <script src="../static/js/login.js"></script>
 </body>
 </html>
 <script></script>

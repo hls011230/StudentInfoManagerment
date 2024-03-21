@@ -2,33 +2,12 @@
 var fn = function () {
   // 获取元素
   var $inputUsername = $("#username");
-  var $inputRealname = $("#realname");
-  var $inputSno = $("#sno")
-  var $inputPhone = $("#phone");
-  var $inputSex = $("#sex");
-  var $inputEmail = $("#email");
   var $password = $("#password");
   var $repeatPassword = $("#repeatPassword");
-  var $inputClassid = $("#classid")
   var $btn = $("#btn");
   var username = false;
-  var realname = false;
-  var sno = false;
-  var phoneState = false;
-  var emailState = false;
   var passwordState = false;
   var repPassword = false;
-  var classid = false;
-  // 失去焦点校验email是否合法
-  $inputEmail.blur(function () {
-    // 校验email
-    checkEmail()
-  })
-  // email聚焦的时候取消校验
-  $inputEmail.focus(function () {
-    emailState = false;
-    removeWarn($(this))
-  })
 
   //用户名聚焦是取消校验
   $inputUsername.focus(function () {
@@ -36,90 +15,29 @@ var fn = function () {
     removeWarn($(this))
   })
 
-  // 真实姓名聚焦的时候取消校验
-  $inputRealname.focus(function () {
-    realname = false;
-    removeWarn($(this))
-  })
-
-
-  // 手机号码聚焦的时候取消校验
-  $inputPhone.focus(function () {
-    phoneState = false;
-    removeWarn($(this))
-  })
   // 密码框聚焦的时候取消校验
   $password.focus(function () {
     passwordState = false;
     removeWarn($(this))
   })
 
-  $inputClassid.focus(function () {
-    classid = false;
-    removeWarn($(this))
-  })
   // 进行提交的时候
   $btn.click(function () {
-    if (!emailState) {
-      alert("请输入正确的Email地址")
-      return;
-    }
-    if (!realname) {
-      alert("请按要求输入正确的真实姓名")
-      return;
-    }
-    if (!phoneState) {
-      alert("请输入正确的手机号码")
-      return;
-    }
-    if (!passwordState) {
-      alert("请输入密码或者正确格式的密码")
-      return;
-    }
-    if (!repPassword) {
-      alert("重复密码和密码不一致")
-      return;
-    }
-    if (!classid) {
-      alert("班级格式错误")
-      return;
-    }
-
     $.ajax({
       "type": "POST",
-      "url": "/regist",
-      "data": {
-        email: $inputEmail.val(),
-        username1: $inputUsername.val(),
-        realname1: $inputRealname.val(),
-        sno: $inputSno.val(),
-        phone: $inputPhone.val(),
-        sex: $inputSex.val(),
-        password: $password.val(),
-        classid: $inputClassid.val()
-      },
+      "url": "/api/register",
+      "contentType": 'application/json;',
+      "data": JSON.stringify({
+        "name":$inputUsername.val(),
+        "password":$password.val()
+      }),
       "success": function (data) {
-        alert("注册成功请登录！")
-        window.location = "/login"
+        alert("注册成功请登录!"+data)
+        window.location = "./login.html"
       }
     })
   })
 
-  //输入用户名的时候进行重复校验
-  $inputUsername.blur(function () {
-    checkUsername()
-  })
-
-
-
-  // 真实姓名输入的时候进行中文校验
-  $inputRealname.blur(function () {
-    checkRealname()
-  })
-  // 输入手机号码时进行号码正确的校验
-  $inputPhone.blur(function () {
-    checkPhone()
-  })
   // 密码框进行输入的时候校验长度
   $password.bind("input", function () {
     checkPasswordLength()
@@ -146,108 +64,6 @@ var fn = function () {
   })
 
 
-  // 校验用户名
-  function checkUsername() {
-
-    // 通过正则表达式进行校验
-    checkUsernameAjax()
-  }
-
-  $inputClassid.blur(function () {
-    checkClass()
-  });
-
-  function checkUsernameAjax() {
-    var name = $inputUsername.val();
-    $.ajax({
-      "type": "CHECKOUT",
-      "url": "/ck_username_regist",
-      "data": {
-        name: name
-      },
-      "success": function (data) {
-        if (data.result.length > 0) {
-          warnFun($inputUsername, "该用户名已存在，请重新输入")
-        } else {
-          username = true;
-        }
-      }
-    })
-  }
-
-  //校验中文姓名
-  function checkRealname() {
-    //得到真实姓名
-    var rn = $inputRealname.val()
-    //通过正则表达式进行校验
-    if (!/^[\u4e00-\u9fa5]+$/.test(rn)) {
-      warnFun($inputRealname, "请输入中文姓名")
-      return;
-    }
-    realname = true;
-  }
-  // 校验mobilephone
-  function checkPhone() {
-    var phone = $inputPhone.val()
-    if (!/^1[34578]\d{9}$/.test(phone)) {
-      warnFun($inputPhone, "请输入正确的手机号码")
-      return;
-    }
-    phoneState = true;
-  }
-
-
-  // 校验email
-  function checkEmail() {
-    // 得到email的值
-    var email = $inputEmail.val()
-    // 通过正则表达式进行校验
-    if (!/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]{2,5}$/.test(email)) {
-      // 如果校验没有通过,给予提示
-      warnFun($inputEmail, "请输入正确的Email")
-      return;
-    }
-    checkEmailAjax()
-  }
-
-  function checkEmailAjax() {
-    var email = $inputEmail.val()
-    $.ajax({
-      "type": "CHECKOUT",
-      "url": "/ck_email_regist",
-      "data": {
-        email: email
-      },
-      "success": function (data) {
-        if (data.result.length > 0) {
-          warnFun($inputEmail, "该Email已经被注册，请输入新的Email地址")
-        } else {
-          emailState = true;
-        }
-      }
-    })
-  }
-
-  //验证班级
-  function checkClass() {
-    var c = $inputClassid.val()
-    $.ajax({
-      "type": "CHECKOUT",
-      "url": "/ck_class_regist",
-      "data": {
-        classid: c
-      },
-      "success": function (data) {
-        if (data.status == -1) {
-          warnFun($inputClassid, "查无此班级存在！请重新输入")
-        } else {
-          classid = true;
-        }
-      }
-    })
-
-  }
-
   // 添加校验方法
   function warnFun(dom, value) {
     dom.parent().addClass("has-error");
@@ -257,7 +73,7 @@ var fn = function () {
 
   // 取消校验方法
   function removeWarn(dom) {
-    dom.parent().removeClass("has-error")
+    dom.parent().removeClass("has-error");
     dom.siblings("div.control-label").remove();
   }
   // 密码框校验
@@ -268,7 +84,7 @@ var fn = function () {
       // 校验等级
       if (checkPasswordLength() < 2) {
 
-        warnFun($password, "密码等级不够")
+        warnFun($password, "密码等级不够");
         $(".strongBox").remove();
         return;
       }
