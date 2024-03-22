@@ -5,16 +5,24 @@ var fn = function(){
   var $password = $("#password");
 
   $btn.click(function(){
-    var username = $inputUsername.val();
-    var password = $password.val();
-    $.post("/login",{
-      "username": username,
-      "password": password
-    },function(data){
-      if(data.result == 1) {
-        window.location = "/"
-      } else {
-        alert("用户名不存在或者密码错误！")
+    $.ajax({
+      "type": "POST",
+      "url": "/api/login",
+      "contentType": 'application/json;',
+      "data": JSON.stringify({
+        "name":$inputUsername.val(),
+        "password":$password.val()
+      }),
+      "success": function (data) {
+
+          if (data.code == 200){
+            window.location.href = "/static/views/index.html"
+            $.cookie("id",data.data[1])
+            $.cookie("name",$inputUsername.val())
+            $.cookie("type",data.data[2])
+          }else{
+            alert("账户不存在或密码错误")
+          }
       }
     })
   })

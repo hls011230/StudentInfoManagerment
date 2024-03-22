@@ -2,7 +2,7 @@
 import json
 
 from web3 import Web3
-from db.db import cursor,connection
+from db.db import connection
 from eth_account.account import Account, LocalAccount, SignedTransaction
 
 
@@ -10,7 +10,7 @@ from eth_account.account import Account, LocalAccount, SignedTransaction
 w3 = Web3(Web3.HTTPProvider('https://sepolia.infura.io/v3/af53cecd02fc46dbb922fe10a6171eda'))
 
 # 合约地址
-contract_address="0x0565c7eA63f097F35380E9801713A89bED09FDf4"
+contract_address="0x5DAf0acdD7316674559581686a861bfA64DEF382"
 
 # ABI
 contract_abi = [
@@ -82,6 +82,19 @@ contract_abi = [
 			}
 		],
 		"name": "modifyStudentName",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "setAdmin",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -313,29 +326,44 @@ def get_admin():
 def get_student_info(id,token):
 	return call_contract_view_func(account=keys[token],func_name="getStudentInfo",_studentId=int(id))
 
+# 获取学生成绩
+def get_student_score(id,token):
+	return call_contract_view_func(account=keys[token],func_name="getStudentScore",_studentId=int(id))
+
+
 # 设置Handler
 def set_handler(address: str,token: str):
 	return call_contract_sign_func(account=keys[token],func_name="setHandler",_handler=address)
 
+
 # 添加学生
-def add_student(id:str,name:str,token):
-	return call_contract_sign_func(account=keys[token],func_name="addStudent",_id=id,_name=name)
+def add_student(name:str,token):
+	id = insert_student(name)
+	return call_contract_sign_func(account=keys[token],func_name="addStudent",_id=int(id),_name=name)
+
 
 # 删除学生
 def delete_student(id,token):
-	return call_contract_sign_func(account=keys[token],func_name="deleteStudent",_id=id)
+	return call_contract_sign_func(account=keys[token],func_name="deleteStudent",_id=int(id))
+
+
+# 修改学生信息
+def update_student(id,name,token):
+	return call_contract_sign_func(account=keys[token],func_name="modifyStudentName",_studentId=int(id),_newName=name)
+
 
 # 修改学生成绩
 def update_student_score(id,num,score,token):
-	return call_contract_sign_func(account=keys[token],func_name="updateScore",_id=id,_num=num,_score=score)
+	return call_contract_sign_func(account=keys[token],func_name="updateScore",_id=int(id),_num=num,_score=score)
+
 
 # 添加学生成绩
 def add_student_score(id,subject,score,token):
-	return call_contract_sign_func(account=keys[token],func_name="addScore",_id=id,_subject=subject,_score=score)
+	return call_contract_sign_func(account=keys[token],func_name="addScore",_id=int(id),_subject=subject,_score=int(score))
+
 
 # 调用合约非view方法
-def call_contract_sign_func(account: LocalAccount,func_name: str,
-                            gas=200000, value=0, **kwargs):
+def call_contract_sign_func(account: LocalAccount,func_name: str, gas=200000, value=0, **kwargs):
     """
     调用合约非View方法
     :param w3: Web3 实例
@@ -359,7 +387,8 @@ def call_contract_sign_func(account: LocalAccount,func_name: str,
     # 签名
     sign_tx: SignedTransaction = account.sign_transaction(tx)
     # 发送
-    return w3.eth.send_raw_transaction(sign_tx.rawTransaction)
+    return w3.eth.send_raw_transaction(sign_tx.rawTransaction).hex()
+
 
 # 调用合约view方法
 def call_contract_view_func(account: LocalAccount,func_name, **kwargs):
@@ -375,25 +404,40 @@ def call_contract_view_func(account: LocalAccount,func_name, **kwargs):
     func = getattr(contract_instance.functions, func_name)(**kwargs)
     return func.call({"from":account.address})
 
+
 # 创建账户
 def create_account(name,password):
 	account = w3.eth.account.create()
-	print(password)
+	cursor = connection.cursor()
 	keystore = account.encrypt(password)
-	query = "INSERT INTO user (name, address,keystore) VALUES (%s, %s, %s)"
+	query = "INSERT INTO user (name, address,keystore,type) VALUES (%s, %s, %s,%s)"
 	json_data = json.dumps(keystore)
-	values = (name, account.address, json_data)
+	values = (name, account.address, json_data,1)
 	cursor.execute(query, values)
 	connection.commit()
+	cursor.close()
 	return account.address
+
 
 # 登录
 def login_account(name,password):
-	query = "SELECT keystore,id FROM user where name = %s"
+	query = "SELECT keystore,id,type FROM user where name = %s"
+	cursor = connection.cursor()
 	cursor.execute(query, (name,))
 	result = cursor.fetchone()
-	print(result)
 	account: LocalAccount = Account.from_key(w3.eth.account.decrypt(json.loads(result[0]),password))
 	keys[str(result[1])] =account
-	balance_wei = w3.eth.get_balance(account.address)
-	print(balance_wei)
+	cursor.close()
+	return result
+
+def insert_student(name):
+    # 创建游标对象
+    account = w3.eth.account.create()
+    cursor = connection.cursor()
+    keystore = account.encrypt("123456")
+    query = "INSERT INTO user (name, address,keystore,type) VALUES (%s, %s, %s,%s)"
+    json_data = json.dumps(keystore)
+    values = (name, account.address, json_data, 2)
+    cursor.execute(query, values)
+    connection.commit()
+    return cursor.lastrowid

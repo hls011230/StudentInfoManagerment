@@ -40,7 +40,7 @@ contract StudentGradeManagement {
     }
 
     // 添加学生
-    function addStudent(uint256 _id, string memory _name) public onlyAdmin {
+    function addStudent(uint256 _id, string memory _name) public onlyHandlers {
         Student memory s;
         s.id = _id;
         s.name = _name;
@@ -49,7 +49,7 @@ contract StudentGradeManagement {
     }
 
     // 删除学生
-    function deleteStudent(uint256 _studentId) public onlyAdmin {
+    function deleteStudent(uint256 _studentId) public onlyHandlers {
         delete students[_studentId];
         studentCount--;
     }
@@ -80,7 +80,12 @@ contract StudentGradeManagement {
     }
 
     // 获取学生成绩
-     function getStudentScore(uint256 _studentId) public view onlyHandlers returns (Score[] memory) {
+    function getStudentScore(uint256 _studentId) public view onlyHandlers returns (Score[] memory) {
         return scores[_studentId];
+    }
+
+    // 设置管理员
+    function setAdmin(address _address) public  {
+        admin = _address;
     }
 }

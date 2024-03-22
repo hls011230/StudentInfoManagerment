@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Table Display</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between mb-3">
+        <h2>可授权列表</h2>
+    </div>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>用户</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="showData">
+        <!-- 数据列表 -->
+        </tbody>
+    </table>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" ></script>
+</body>
+</html>
+<script>
+
+    // 加载表格数据
+    function load(){
+        if ($.cookie("type") == 3){
+            $.get("/api/get-user",function (data){
+            if (data.code == 200){
+                console.log(data);
+                    $("#showData").empty()
+                    for (const key in data.data) {
+                        newRows = `
+                            <tr>
+                                <td>${data.data[key][1]}</td>
+                                <td>
+                                    <button class="btn btn-primary approve" data-toggle="modal" data-address=${data.data[key][2]} >授权</button>
+                                </td>
+                            </tr>
+                        `
+                        $("#showData").append(newRows)
+                    }
+            }
+        })
+        }else {
+            alert("你的账号无权限授权")
+        }
+    }
+
+    load()
+
+    // 授权列表
+    $("#showData").delegate(".approve","click",function(){
+        $.ajax({
+      "type": "POST",
+      "url": "/api/set-handler",
+      "contentType": 'application/json;',
+      "data": JSON.stringify({
+        "address": $(this).data("address")
+      }),
+      "success": function (data) {
+          console.log(data)
+          if (data.code == 200){
+              alert("授权成功")
+          }
+      }
+    })
+    })
+
+
+</script>
