@@ -315,6 +315,7 @@ contract_abi = [
 # 创建合约实例
 contract_instance = w3.eth.contract(address=contract_address, abi=contract_abi)
 
+# 存储登录账户
 keys = {}
 
 
@@ -344,7 +345,7 @@ def add_student(name:str,token):
 
 # 删除学生
 def delete_student(id,token):
-	return call_contract_sign_func(account=keys[token],func_name="deleteStudent",_id=int(id))
+	return call_contract_sign_func(account=keys[token],func_name="deleteStudent",_studentId=int(id))
 
 
 # 修改学生信息
@@ -412,7 +413,7 @@ def create_account(name,password):
 	keystore = account.encrypt(password)
 	query = "INSERT INTO user (name, address,keystore,type) VALUES (%s, %s, %s,%s)"
 	json_data = json.dumps(keystore)
-	values = (name, account.address, json_data,1)
+	values = (name, account.address, json_data,0)
 	cursor.execute(query, values)
 	connection.commit()
 	cursor.close()
@@ -430,6 +431,7 @@ def login_account(name,password):
 	cursor.close()
 	return result
 
+# 添加学生
 def insert_student(name):
     # 创建游标对象
     account = w3.eth.account.create()

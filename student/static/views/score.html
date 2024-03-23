@@ -108,7 +108,8 @@
     // 加载表格数据
     function load(){
 
-        $.get("/api/get-all-student",function (data){
+        if ($.cookie("type") == 3 || $.cookie("type") == 1 ){
+            $.get("/api/get-all-student",function (data){
             if (data.code == 200){
                     $("#showData").empty()
                     for (const key in data.data) {
@@ -123,6 +124,9 @@
                     }
             }
         })
+        }else {
+            alert("你无权限进行操作")
+        }
 
     }
 
@@ -131,7 +135,7 @@
     $("#addDataBtn").click(function (){
         $.get("/api/get-course",function (data){
             if (data.code == 200){
-                console.log(data.data)
+                $("#course").empty()
                 for(var i = 0 ; i < data.data.length; i ++){
                 new DataOption_course(i,data.data[i]);
             }}
@@ -175,6 +179,8 @@
       "success": function (data) {
         if (data.code == 200){
             alert("添加成功")
+            $(".close").trigger("click")
+            load()
         }
       }
     })

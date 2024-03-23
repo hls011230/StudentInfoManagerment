@@ -26,5 +26,9 @@ var fn = function(){
       }
     })
   })
+
+  $("#register").click(function (){
+    window.location.href = "regist.html"
+  })
 };
 fn();

@@ -67,6 +67,9 @@
       "type": "POST",
       "url": "/api/set-handler",
       "contentType": 'application/json;',
+      "headers":{
+          "token" : $.cookie("id")
+       },
       "data": JSON.stringify({
         "address": $(this).data("address")
       }),
@@ -74,6 +77,7 @@
           console.log(data)
           if (data.code == 200){
               alert("授权成功")
+              load()
           }
       }
     })

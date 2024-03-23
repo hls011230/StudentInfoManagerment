@@ -61,7 +61,7 @@
 <script>
     // 加载表格数据
     function load(){
-        if ($.cookie("type") == 1){
+        if ($.cookie("type") == 1 || $.cookie("type") == 3){
             $.get("/api/get-all-student",function (data){
             if (data.code == 200){
                 console.log(data);
@@ -72,7 +72,6 @@
                                 <td>${data.data[key][0]}</td>
                                 <td><b id="b${data.data[key][0]}" >${data.data[key][1]}</b><input id="i${data.data[key][0]}" class="patchVal" style="display: none" value=${data.data[key][1]} data-id=${data.data[key][0]} ></td>
                                 <td>
-                                    <button class="btn btn-primary detail" data-toggle="modal" data-target="#StudentDetail" data-id=${data.data[key][0]} >详情</button>
                                     <button class="btn btn-success update" data-toggle="modal" data-id=${data.data[key][0]} >修改</button>
                                     <button class="btn btn-danger delete" data-toggle="modal" data-id=${data.data[key][0]} >删除</button>
                                 </td>
@@ -82,28 +81,10 @@
                     }
             }
         })
+        }else{
+            alert("你无权限进行操作")
         }
 
-        if ($.cookie("type") == 2){
-            $.post("/payment/queryBySeller",{"seller":$.cookie("username")},function(data){
-                console.log(data);
-                if (data.code == 0){
-                    $("#showData").empty()
-                    for (const key in data.data) {
-                        newRows = `
-                            <tr>
-                                <td>${data.data[key].order_id}</td>
-                                <td>${data.data[key].payment_id}</td>
-                                <td>${data.data[key].amount}</td>
-                                <td>${data.data[key].timestamp}</td>
-                                <td><button class="btn btn-success paymentDetail" data-toggle="modal" data-target="#PaymentDetail" data-id=${data.data[key].payment_id}>详情</button></td>
-                            </tr>
-                        `
-                        $("#showData").append(newRows)
-                    }
-                }
-            })
-        }
 
 
     }

@@ -45,7 +45,7 @@ def get_all_student():
 def get_user():
     # 创建游标对象
     cursor = connection.cursor()
-    query = "SELECT * FROM user where type = 1"
+    query = "SELECT * FROM user where type = 0"
     cursor.execute(query)
     result = cursor.fetchall()
     cursor.close()
@@ -74,6 +74,24 @@ def update_student(id, name):
     cursor = connection.cursor()
     query = "UPDATE user SET name = %s WHERE id= %s"
     values = (name, id)
+    cursor.execute(query, values)
+    try:
+        connection.commit()
+    except Exception as e:
+        print(e)
+        cursor.close()
+        return 1
+    else:
+        cursor.close()
+        return 0
+
+
+# 修改管理信息
+def update_user(address):
+    # 创建游标对象
+    cursor = connection.cursor()
+    query = "UPDATE user SET type = 1 WHERE address = %s"
+    values = (address,)
     cursor.execute(query, values)
     try:
         connection.commit()

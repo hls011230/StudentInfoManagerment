@@ -36,6 +36,7 @@ def set_handler():
     data = request.json
     token = request.headers.get('token')
     address = data['address']
+    res = db.update_user(address)
     receipt = contract.set_handler(address,token)
     if (receipt == 1):
         return response(data="error", status_code=0)

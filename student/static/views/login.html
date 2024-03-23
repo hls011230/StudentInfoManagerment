@@ -1,63 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生登录</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.css">
-    <style>
-        .regist{
-          border: 1px solid #eee;
-          padding: 0 20px 20px 20px;
-    
-          margin-top:30px;
-          border-radius: 4px;
-          box-shadow: 0px 0px 3px rgba(0,0,0,0.1);
-        }
-        .regist h2{
-          margin-bottom: 20px;
-          font-size: 24px;
-        }
-        .strongBox {
-          margin: 10px 0;
-          padding: 5px 8px;
-          font-size: 12px;
-        }
-        .wid{
-          width: 240px;
-        }
-        input{
-          margin-left: 242px;
-        }
-        body{
-          background-image: url("../static/img/1.jpg");
-        }
-      </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生信息系统登录</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 300px;
+    }
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333333;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #666666;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cccccc;
+      border-radius: 4px;
+      outline: none;
+    }
+    .form-group input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: #ffffff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .form-group input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+    .form-group .error-message {
+      color: #ff0000;
+      margin-top: 5px;
+    }
+  </style>
 </head>
-<body class="text-center">
-    <div class="regist col-xs-6  col-md-offset-3">
-        <main class="form-signin">
-          <form>
-            <h1 class="h3 mb-3 fw-normal" style="color: #e0ddddc4;" >Please sign in</h1>
-            <div class="form-floating">
-              <label for="floatingInput"  style="color: #e0ddddc4;">Username</label>
-              <input type="text" class="form-control wid text-center" id="username" placeholder="用户名称">
-              
-            </div>
-            <div class="form-floating">
-              <label for="floatingPassword"  style="color: #e0ddddc4;">Password</label>
-              <input type="password" class="form-control wid text-center" id="password" placeholder="Password">
-            </div>
-          </form>
-        </main>
-        <br>
-        <button id="btn" class="w-100 btn btn-lg btn-primary" style="background-color: grey; border: 1px solid grey;" type="submit">Sign in</button>
-        <a href="/regist" class="w-100 btn btn-lg btn-primary" style="background-color: grey;   border: 1px solid grey;">Sign up</a>
+<body>
+  <div class="login-container">
+    <h2>学生信息系统登录</h2>
+    <div id="login-form" >
+      <div class="form-group">
+        <label for="username">用户名</label>
+        <input type="text" id="username" name="username" required>
+        <div class="error-message" id="username-error"></div>
       </div>
-      <script src="../static/js/jquery.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-      <script src="../static/js/login.js"></script>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" required>
+        <div class="error-message" id="password-error"></div>
+      </div>
+      <div class="form-group">
+        <input type="submit" id="btn" value="登录">
+      </div>
+      <div class="form-group">
+        <input type="submit" id="register" value="注册">
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+  <script src="../static/js/login.js"></script>
 </body>
 </html>
-<script></script>
